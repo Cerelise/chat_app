@@ -2,7 +2,7 @@
 	<div id="page-box">
 		<div id="logo">
 			<img src="http://127.0.0.1:9000/upload/admin.jpg" alt="" />
-			<h1>{{ text }}</h1>
+			<h2>{{ text }}</h2>
 		</div>
 
 		<div id="unread">
@@ -40,6 +40,7 @@
 		<div id="userinfo">
 			<img :src="userinfo.headImg" alt="" />
 			<span> {{ userinfo.nickName }} :</span>
+			<el-button type="danger" @click="userLogout">注销</el-button>
 		</div>
 
 		<div id="text-input">
@@ -51,7 +52,7 @@
 			></textarea>
 			<button @click="clickto">send</button>
 		</div>
-		<LoginBox :ShowBox="showbox" @changeLogin="changeLogin"></LoginBox>
+		<!-- <LoginBox :ShowBox="showbox" @changeLogin="changeLogin"></LoginBox> -->
 		<PrivateChat
 			:ShowBox="showOtherChat"
 			:otherChatData="otherChatData"
@@ -64,7 +65,7 @@
 
 <script>
 import axios from 'axios'
-import LoginBox from '../components/LoginBox'
+// import LoginBox from '../components/LoginBox'
 import PrivateChat from '../components/PrivateChat'
 // import store from '../store'
 export default {
@@ -73,7 +74,7 @@ export default {
 			text: '',
 			text_input: '',
 			msgList: [],
-			showbox: true,
+			// showbox: true,
 			showOtherChat: false,
 			// 私聊相关聊天数据
 			otherChatData: {},
@@ -83,7 +84,7 @@ export default {
 	},
 
 	components: {
-		LoginBox: LoginBox,
+		// LoginBox: LoginBox,
 		PrivateChat: PrivateChat,
 	},
 
@@ -116,6 +117,10 @@ export default {
 		}
 	},
 	methods: {
+		// 退出登录
+		userLogout() {
+			this.$store.dispatch('userLogout')
+		},
 		openOtherChat(other) {
 			this.showOtherChat = true
 			this.otherChatData = other

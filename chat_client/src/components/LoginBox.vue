@@ -39,7 +39,7 @@ export default {
 			console.log(this.username + ' ' + this.password)
 			axios({
 				method: 'post',
-				url: 'http://127.0.0.1:9000/api-json/login/',
+				url: 'http://127.0.0.1:9000/api-json/dchat-login/',
 				data: Qs.stringify({
 					username: this.username,
 					password: this.password,
