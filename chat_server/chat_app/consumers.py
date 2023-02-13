@@ -31,7 +31,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
         token_str = text_data_json['message']['token']
 
         userinfo = await getUserinfo(token_str)
+        if not userinfo.headImg:
+            userinfo.headImg = "admin.jpg"
         content = getResponseData(userinfo, text_data_json)
+
+        print('consumer', userinfo.headImg)
+        print('after', content)
 
         if content['code'] == 201:
             await self.channel_layer.group_send(str(content['data']['to']), {

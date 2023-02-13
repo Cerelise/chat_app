@@ -6,3 +6,4 @@ class Userinfo_data(serializers.ModelSerializer):
     class Meta:
         model = Userinfo
         fields = ['nickName', 'headImg', 'id']
+        # fields = "__all__"

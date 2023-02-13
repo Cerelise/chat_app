@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -5,13 +6,14 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 from chat_app.models import Userinfo
 from chat_app.serializers import Userinfo_data
-from django.contrib.auth.hashers import check_password
+from django.contrib.auth.hashers import check_password, make_password
 
 HostUrl = 'http://127.0.0.1:9000/upload/'
 
 
+# 登录
 @api_view(['POST'])
-def userLogin(request):
+def dchat_login(request):
     # print(request.POST)
     # 读取输入
     username = request.POST['username']
@@ -32,6 +34,65 @@ def userLogin(request):
             return Response('pwd err')
     else:
         return Response('user none')
+
+
+# 退出登录
+@api_view(['POST'])
+def dchat_logout(request):
+    token = request.POST['token']
+    user_token = Token.objects.get(key=token)
+    user_token.delete()
+    return Response('logout')
+
+
+# 注册
+@api_view(['POST'])
+def dchat_register(request):
+    username = request.POST['username']
+    password = request.POST['password']
+    # repassword = request.POST['repassword']
+    user = User.objects.filter(username=username)
+    if user:
+        return Response('repeat')
+    else:
+        new_password = make_password(password, username)
+        newUser = User(username=username, password=new_password)
+        newUser.save()
+
+    token = Token.objects.get_or_create(user=newUser)
+    token = Token.objects.get(user=newUser)
+    # print(token)
+    # headImg類型限制 上傳有報錯 展示正常
+    userinfo = Userinfo.objects.get_or_create(nickName=username, belong=newUser)
+    userinfo = Userinfo.objects.get(belong=newUser)
+
+    userinfo_data = {
+        'token': token.key,
+        'nickName': str(userinfo.nickName),
+        "headImg": 'admin.jpg'
+    }
+    print(userinfo_data)
+
+    # if userinfo_data.nickName == "":
+    #     userinfo_data = {"nickName": "未设置", "headImg": "upload/admin.jpg"}
+    return Response(userinfo_data)
+
+
+# 重置密码
+@api_view(['POST'])
+def dchat_reset_pwd(request):
+    username = request.POST['username']
+    password = request.POST['password']
+    user = User.objects.filter(username=username)
+    if not user:
+        return Response('user not exist')
+    else:
+        new_password = make_password(password, username)
+        # print(new_password)
+        User.objects.filter(username=username).update(password=new_password)
+        new_user = User.objects.filter(username=username)
+        # print(new_user)
+        return Response('ok')
 
 
 @api_view(['POST'])
@@ -64,20 +125,29 @@ class Userinfo_view(APIView):
                 userinfo = Userinfo.objects.filter(belong=user)
 
                 userinfo_data = Userinfo_data(userinfo, many=True).data[0]
+                print('before', userinfo_data)
+
+                # for k, v in userinfo_data.items():
+                #     if k == "headImg":
+                #         if v == None:
+                #             v = "admin.jpg"
+                #     print("userinfo", k, v)
+                # for k, v in userinfo_data.items():
+                #     print("userinfo", k, v)
+                if userinfo_data['headImg'] == None:
+                    userinfo_data['headImg'] = '/upload/admin.jpg'
+                # userinfo_data = OrderedDict([
+                #     (k, "/upload/admin.jpg") if k == 'headImg' else (k, v)
+                #     for k, v in userinfo_data.items()
+                # ])
+
+                print('after', userinfo_data)
+                # print('头像地址：', userinfo_data.get("headImg"))
             else:
                 userinfo_data = {
                     "nickName": "未登录",
-                    "headImg": "upload/admin.jpg"
+                    "headImg": "/upload/admin.jpg"
                 }
-            # if userinfo_data.is_valid():
-            #     return Response(userinfo_data.data)
-            # else:
-            #     return Response(userinfo_data.errors)
-
-            # userinfo_data = {
-            #     "nickName": userinfo.nickName,
-            #     "headImg": HostUrl + str(userinfo.headImg)
-            # }
         else:
-            userinfo_data = {"nickName": "未登录", "headImg": "upload/admin.jpg"}
+            userinfo_data = {"nickName": "未登录", "headImg": "/upload/admin.jpg"}
         return Response(userinfo_data)
