@@ -23,4 +23,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', views.first_api),
     path('api-json/', include(api_url))
+    # api-json/userinfo    api-json/login
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
